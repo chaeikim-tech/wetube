@@ -1,0 +1,8 @@
+extends base
+
+block content 
+    form(method="POST")
+        input(placeholder="Title", required, type="text", name="title", maxlength=30)
+        input(placeholder="Description", required, type="text", name="description", minlegnth=10)
+        input(placeholder="Hashtags, separated by comma.", required, type="text", name="hashtags")
+        input(type="submit", value="Upload Video")
