@@ -111,6 +111,7 @@ export const finishGithubLogin = async (req, res) => {
             (email) => email.primary === true && email.verified === true
         );
         if (!emailObj) {
+            // set notification
             return res.render("/login");
         }
         let user = await User.findOne({ email: emailObj.email });
@@ -137,7 +138,66 @@ export const logout = (req, res) => {
     return res.redirect("/");
 };
 
+export const getEdit = (req, res) => {
+    return res.render("edit-profile", { pageTitle: "Edit Profile" });
+};
+
+export const postEdit = async (req, res) => {
+    const {
+        session: {
+            user: { _id, avatarUrl },
+        },
+        body: { name, email, username, location },
+        file,
+    } = req;
+    console.log(file);
+    const updatedUser = await User.findByIdAndUpdate(
+        _id,
+        {
+            avatarUrl: file ? file.path : avatarUrl,
+            name,
+            email,
+            username,
+            location,
+        },
+        { new: true }
+    );
+    req.session.user = updatedUser;
+    return res.render("/users/edit");
+};
+
+export const getChangePassword = (req, res) => {
+    if(req.session.user.socialOnly === true) {
+        return res.redirect("/");
+    }
+    return res.render("users/change-password", { pageTitle: "Change Password" });
+};
+
+export const postChangepassword = async(req, res) => {
+    const {
+        session: {
+            user: { _id },
+        },
+        body: { oldPassword, newPassword, newPasswordConfirmation },
+    } = req;
+    const user = await User.findById(_id);
+    const ok = await bcrypt.compare(oldPassword, user.password);
+    if(!ok) {
+        return res.status(400).render("users/change-password", {
+            pageTitle: "Change Password",
+            errorMessage: "The current password is incorrect.",
+        });
+    }
+    if(newPassword !== newPasswordConfirmation) {
+        return res.status(400).render("users/change-password", {
+            pageTitle: "Change Password",
+            errorMessage: "The password does not match the confirmation.",
+        });
+    }
+    user.password = newPassword;
+    await user.save();
+    return res.redirect("/users/logout");
+}
 
 
-export const edit = (req, res) => res.send("Edit User");
 export const see = (req, res) => res.send("See User");
