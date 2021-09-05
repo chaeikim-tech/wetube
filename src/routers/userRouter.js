@@ -5,7 +5,7 @@ import { avatarUpload, protectorMiddleware, publicOnlyMiddleware } from '../midd
 const userRouter = express.Router();
 
 userRouter.get("/logout", protectorMiddleware, logout);
-userRouter.route("/edit").all(protectorMiddleware).get(getEdit).post(avatarUpload.single("avatar"), uploadFiles.single("avatar"), postEdit);
+userRouter.route("/edit").all(protectorMiddleware).get(getEdit).post(avatarUpload.single("avatar"), postEdit);
 userRouter.route("/change-password").all(protectorMiddleware).get(getChangePassword).post(postChangepassword);
 
 userRouter.get("/github/start", publicOnlyMiddleware, startGithubLogin);
